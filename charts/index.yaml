@@ -3,9 +3,9 @@ entries:
   helmup:
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2024-08-19T00:59:10.393681+03:00"
-    description: Official Sirrend helmup application
-    digest: 6d00fd3e306332685521616207a02416799a1549f29791ec328b95ac7f6c2c89
+    created: "2024-08-21T23:13:30.773802+03:00"
+    description: Official Sirrend HelmUp application
+    digest: e3af6fc7789298fda86ffbaa814bb9416250906e2ad48fb9dfd8116cdd97833c
     maintainers:
     - email: business@sirrend.com
       name: Sirrend
@@ -15,4 +15,4 @@ entries:
     urls:
     - helmup-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-19T00:59:10.392287+03:00"
+generated: "2024-08-21T23:13:30.771785+03:00"
