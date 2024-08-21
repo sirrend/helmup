@@ -1,6 +1,6 @@
 apiVersion: v2
 name: helmup
-description: Official Sirrend helmup application
+description: Official Sirrend HelmUp application
 type: application
 version: 0.1.0
 appVersion: "1.1.0"
