@@ -1,16 +1,6 @@
-kind: HelmRepository
-name: HelmUp
-displayName: HelmUp - Helm Charts Auto-Updater
-description: HelmUp is a Kubernetes-based utility designed to upgrade the configuration of both community-maintained and self-owned Helm charts. 
-homeURL: https://yuvalpress.github.io/helmup/
-repoURL: https://github.com/yuvalpress/helmup.git
-keywords:
-  - helm
-  - kubernetes
-  - devops
-license: BSL
-maintainers:
+repositoryID: 85558de3-62a1-470f-af98-3f324e74c23a
+owners:
+  - name: Yuval Press
+    email: yuvalpress@gmail.com
   - name: Sirrend
     email: business@sirrend.com
-  - name: Collaborator Name
-    email: collaborator.email@example.com
