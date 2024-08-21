@@ -1,0 +1,15 @@
+{{- if .Values.notifications.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "helmup-notifications-service.fullname" . }}
+  labels:
+    {{- include "helmup-notifications-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.notifications.service.type }}
+  ports:
+    - port: {{ .Values.notifications.service.port }}
+      targetPort: 9000
+  selector:
+    {{- include "helmup-notifications-service.selectorLabels" . | nindent 4 }}
+{{- end }}

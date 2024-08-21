@@ -1,0 +1,17 @@
+{{- if .Values.notifications.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "helmup-notifications-service.fullname" . }}-test-connection"
+  labels:
+    {{- include "helmup-notifications-service.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "helmup-notifications-service.fullname" . }}:{{ .Values.notifications.service.port }}']
+  restartPolicy: Never
+{{- end }}

@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: "{{ include "helmup-github-scraper.fullname" . }}"
+  labels:
+    {{- include "helmup-github-scraper.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.cronJobExpression }}"  
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          labels:
+            {{- include "helmup-github-scraper.labels" . | nindent 8 }}
+            {{- with .Values.podLabels }}
+            {{- toYaml . | nindent 8 }}
+            {{- end }}
+        spec:
+          restartPolicy: {{ .Values.restartPolicy | default "OnFailure" }}  
+          serviceAccountName: {{ include "helmup-github-scraper.serviceAccountName" . }}  
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: "{{ .Values.image.pullPolicy }}"  
+              env:
+                {{- range $key, $value := .Values.appConfig.github }}
+                - name: {{ $key }}
+                  value: "{{ $value }}"
+                {{- end }}
+                - name: HELMUP_SVC_URL
+                  value: {{ .Values.appConfig.HELMUP_SVC_URL }}
+                - name: "GITHUB_TOKEN"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Release.Name }}-secret
+                      key: github_token
+  successfulJobsHistoryLimit: {{ .Values.successfulJobsHistoryLimit | default 3 }}  
+  failedJobsHistoryLimit: {{ .Values.failedJobsHistoryLimit | default 1 }}      

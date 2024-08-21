@@ -1,0 +1,85 @@
+{{- if .Values.notifications.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helmup-notifications-service.fullname" . }}
+  labels:
+    {{- include "helmup-notifications-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.notifications.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "helmup-notifications-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "helmup-notifications-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.notifications.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "helmup-notifications-service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.notifications.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.notifications.image.repository }}:{{ .Values.notifications.image.tag }}"
+          imagePullPolicy: {{ .Values.notifications.image.pullPolicy }}
+          ports:
+            - containerPort: 9000
+          env:
+            - name: "WEBHOOK_URL"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helmup-service.secret" . }}
+                  key: webhook_url
+          resources:
+            {{- toYaml .Values.notifications.resources | nindent 12 }}
+          {{- if .Values.notifications.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.notifications.livenessProbe.path }}
+              port: {{ .Values.notifications.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.notifications.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notifications.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notifications.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.notifications.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.notifications.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.notifications.readinessProbe.path }}
+              port: {{ .Values.notifications.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.notifications.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notifications.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notifications.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.notifications.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.notifications.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.notifications.startupProbe.path }}
+              port: {{ .Values.notifications.startupProbe.port }}
+            initialDelaySeconds: {{ .Values.notifications.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notifications.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notifications.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.notifications.startupProbe.failureThreshold }}
+          {{- end }}
+      {{- with .Values.notifications.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.notifications.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.notifications.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.notifications.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

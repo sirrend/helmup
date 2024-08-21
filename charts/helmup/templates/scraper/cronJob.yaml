@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: "{{ include "helmup-github-scraper.fullname" . }}"
+  labels:
+    {{- include "helmup-github-scraper.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.scraper.cronJobExpression }}"  
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          {{- with .Values.scraper.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          labels:
+            {{- include "helmup-github-scraper.labels" . | nindent 8 }}
+            {{- with .Values.scraper.podLabels }}
+            {{- toYaml . | nindent 8 }}
+            {{- end }}
+        spec:
+          restartPolicy: {{ .Values.scraper.restartPolicy | default "OnFailure" }}  
+          serviceAccountName: {{ include "helmup-github-scraper.serviceAccountName" . }}  
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.scraper.image.repository }}:{{ .Values.scraper.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: "{{ .Values.scraper.image.pullPolicy }}"  
+              env:
+                {{- range $key, $value := .Values.global.appConfig.github }}
+                - name: {{ $key }}
+                  value: "{{ $value }}"
+                {{- end }}
+                - name: HELMUP_SVC_URL
+                  value: '{{ include "helmup-engine.fullname" . }}:{{ .Values.engine.service.port }}'
+                - name: "GITHUB_TOKEN"
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "helmup-service.secret" . }}
+                      key: github_token
+          {{- with .Values.scraper.volumes }}
+          volumes:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{- with .Values.scraper.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{- with .Values.scraper.affinity }}
+          affinity:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{- with .Values.scraper.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}  
+  successfulJobsHistoryLimit: {{ .Values.scraper.successfulJobsHistoryLimit | default 3 }}  
+  failedJobsHistoryLimit: {{ .Values.scraper.failedJobsHistoryLimit | default 1 }}      

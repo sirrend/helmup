@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helmup-engine.fullname" . }}
+  labels:
+    {{- include "helmup-engine.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.engine.autoscaling.enabled }}
+  replicas: {{ .Values.engine.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "helmup-engine.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.engine.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "helmup-engine.labels" . | nindent 8 }}
+	      {{- with .Values.engine.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.engine.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "helmup-engine.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.engine.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.engine.securityContext | nindent 12 }}
+          image: "{{ .Values.engine.image.repository }}:{{ .Values.engine.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.engine.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8090
+              protocol: TCP
+          env:
+            - name: "OPENAI_API_KEY"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helmup-service.secret" . }}
+                  key: openai_token
+            - name: "GITHUB_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helmup-service.secret" . }}
+                  key: github_token
+            - name: "JIRA_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helmup-service.secret" . }}
+                  key: jira_token
+            - name: "DESIRED_KUBE_VERSION"
+              value: "{{ .Values.global.appConfig.target_kube_version }}"
+            - name: "REFORMAT_HELM_TEMPLATES"
+              value: "{{ .Values.global.appConfig.reformat_helm_templates }}"
+            - name: "UPGRADE_MAJORS"
+              value: "{{ .Values.global.appConfig.upgrade_majors }}"
+            - name: "JIRA_ENABLED"
+              value: "{{ .Values.global.appConfig.jira.enabled }}"
+            - name: "JIRA_SERVER_URL"
+              value: "{{ .Values.global.appConfig.jira.server_url }}"
+            - name: "JIRA_PROJECT_KEY"
+              value: "{{ .Values.global.appConfig.jira.project_key }}"
+            - name: "JIRA_USERNAME"
+              value: "{{ .Values.global.appConfig.jira.username }}"
+            - name: "NOTIFICATIONS_ENABLED"
+              value: "{{ .Values.global.appConfig.notifications.enabled }}"
+            - name: "NOTIFICATIONS_TYPE"
+              value: "{{ .Values.global.appConfig.notifications.type }}"
+            - name: "NOTIFICATIONS_SERVICE_URL"
+              value: '{{ include "helmup-notifications-service.fullname" . }}:{{ .Values.notifications.service.port }}/event'
+          {{- if .Values.engine.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.engine.livenessProbe.path }}
+              port: {{ .Values.engine.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.engine.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.engine.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.engine.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.engine.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.engine.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.engine.readinessProbe.path }}
+              port: {{ .Values.engine.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.engine.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.engine.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.engine.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.engine.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.engine.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.engine.startupProbe.path }}
+              port: {{ .Values.engine.startupProbe.port }}
+            initialDelaySeconds: {{ .Values.engine.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.engine.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.engine.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.engine.startupProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.engine.resources | nindent 12 }}
+          {{- with .Values.engine.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.engine.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.engine.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.engine.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.engine.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

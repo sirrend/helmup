@@ -1,0 +1,68 @@
+# Default values for sample-tomcat-netanelkoli.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+namespace: default
+
+cronjob:
+  enabled: false
+  imageName: "yuval"
+  imageTag: "0.5.6"
+
+image:
+  repository: netanelkoli/ricknmorty
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart version.
+  tag: "1.0.0"
+
+service:
+  type: NodePort
+  targetPort: 5000
+  port: 80
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+cert-manager:
+  installCRDs: false
+
+  replicaCount: 1
+
+  strategy: { }
+    # type: RollingUpdate
+    # rollingUpdate:
+  #   maxSurge: 0
+  #   maxUnavailable: 1
+
+  # Comma separated list of feature gates that should be enabled on the
+  # controller pod.
+  featureGates: ""
+
+  image:
+    repository: quay.io/jetstack/cert-manager-controller
+
+kube-state-metrics:
+  collectors:
+    certificatesigningrequests: true
+    configmaps: true
+    cronjobs: true
+    daemonsets: true
+    deployments: true
+    endpoints: true
+    horizontalpodautoscalers: true
+    ingresses: true
+    jobs: true
+
+app:
+  minio:
+    url: "https://test.com"

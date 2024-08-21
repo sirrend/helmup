@@ -1,0 +1,60 @@
+replicaCount: 1
+
+cronJobExpression: "0 0 * * *"
+successfulJobsHistoryLimit: 3
+failedJobsHistoryLimit: 1
+
+image:
+  repository: sirrend/helmup-github-scraper
+  pullPolicy: IfNotPresent
+  tag: "0.1.4"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+securityContext: {}
+
+resources: {}
+
+volumes: []
+
+volumeMounts: {}
+
+appConfig:
+  github:
+    CUSTOMER_NAME: "sirrend"
+    GIT_REPOSITORY_NAME: "kuba_test"
+    GIT_BRANCH: "main"
+    GIT_REPOSITORY_URL: "https://github.com/sirrend/kuba_test.git"
+  HELMUP_SVC_URL: "http://helmup-engine"
+
+externalSecret:
+  enabled: true
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  backendType: secretsManager  # e.g., secretsManager for AWS Secrets Manager
+  secretKeyGithub: sirrend-github-token
+  refreshInterval: 30h
+  secretVersion: "" # Optional
+  secretTemplate:
+    type: Opaque
+    annotations: {}
+    labels: {}
+    data: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

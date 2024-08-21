@@ -1,0 +1,84 @@
+replicaCount: 1
+
+image:
+  repository: sirrend/helmup-notifications-service
+  tag: 0.1.1
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+serviceAccount:
+  create: false
+
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+livenessProbe:
+  enabled: true
+  path: /health
+  port: 9000
+  initialDelaySeconds: 15
+  periodSeconds: 300
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: false
+  path: /health
+  port: 9000
+  initialDelaySeconds: 20
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+startupProbe:
+  enabled: false
+  path: /health
+  port: 9000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+Secret:
+  # Whether to create a k8s secret from values file directly. Cannot be enabled if externalSecret is enabled 
+  SLACK_WEBHOOK_URL: "<URL>"
+  enableSecret: false
+
+config:
+  notifications:
+    channel: "slack" # Valid options are ["slack", "teams", "None"]
+    webhook_url: ""
+
+externalSecret:
+  enabled: true
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  backendType: secretsManager  # e.g., secretsManager for AWS Secrets Manager
+  secretKey: sirrend-slack-webhook-secret # e.g., the the slack webhook url from secret manager
+  refreshInterval: 30h
+  secretVersion: "" # Optional
+  secretTemplate:
+    type: Opaque
+    annotations: {}
+    labels: {}
+    data: {}
+

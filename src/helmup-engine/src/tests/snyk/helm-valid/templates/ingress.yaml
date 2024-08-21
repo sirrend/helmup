@@ -1,0 +1,54 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: "{{ .Chart.Name }}-ingress"
+  namespace: "{{ .Values.namespace }}"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              serviceName: "{{ .Chart.Name }}"
+              servicePort: 5000
+            path: /healthcheck
+          - backend:
+              serviceName: "{{ .Chart.Name }}"
+              servicePort: 5000
+            path: /get_results
+---
+{{ if eq .Values.cronjob.enabled true }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "{{ .Chart.Name }}-secondary-compactor"
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "{{ .Values.schedule }}"
+  jobTemplate:
+    metadata:
+      labels:
+        app: compactor
+        release: "{{ .Release.Name }}"
+    spec:
+      template:
+        spec:
+          restartPolicy: "{{ .Values.restartPolicy }}"
+          containers:
+            - name: compactor
+              image: "{{ .Values.cronjob.imageName }}:{{ .Values.cronjob.imageTag }}"
+              imagePullPolicy: "{{ .Values.imagePullPolicy }}"
+              env:
+                - name: FS_S3A_ENDPOINT
+                  value: "{{ .Values.app.minio.url }}"
+                {{- with .Values.app.extraEnv }}
+                {{- . | toYaml | nindent 16 }}
+                {{- end }}
+              resources:
+                "{{- toYaml .Values.resources | trim | nindent 16 }}"
+{{ end }}
