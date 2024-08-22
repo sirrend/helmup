@@ -24,7 +24,7 @@ Leveraging AI, Helmup scans your GitHub repositories, identifies all your Helm c
 - Optionally generates a Jira ticket
 - Optionally sends notifications via Slack or Microsoft Teams
 
-Architecture
+### Architecture
 
 Helmup is built on a microservices architecture, consisting of three core components:
 
@@ -44,7 +44,7 @@ Helmup is built on a microservices architecture, consisting of three core compon
 ### Instructions
 
 1. **Access the Helm Chart:**  
-    Go directly to the [etcd Helm chart on ArtifactHub](https://artifacthub.io/packages/helm/bitnami/etcd).
+    Go directly to the [Helmup Helm chart on ArtifactHub](https://artifacthub.io/packages/helm/helmup/helmup).
 
 2. **Download the Latest Version:**
     ```bash
