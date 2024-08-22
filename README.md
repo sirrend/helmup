@@ -48,7 +48,7 @@ Helmup is built on a microservices architecture, consisting of three core compon
 
 2. **Download the Latest Version:**
     ```bash
-    helm repo add sirrend https://sirrend.github.io/helmup/charts/
+    helm repo add sirrend https://sirrend.github.io/helmup/releases/
     helm repo update
     helm pull sirrend/helmup
     ```
@@ -64,7 +64,7 @@ Helmup is built on a microservices architecture, consisting of three core compon
 ## Requirements 
 The application expects a k8s secret "helmup-secret" with the following keys:
 
-```["openai_token", "github_token", "jira_token", ""(Optional) ]```
+```["openai_token", "github_token", "jira_token", "webhook_url"(Optional) ]```
 
 We provided a convinient way to use `ExternSecrets` application to retreive them. If used externally, make sure to create a secret named `helmup-secret` with these keys!
 
