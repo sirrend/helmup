@@ -1,0 +1,46 @@
+apiVersion: v1
+entries:
+  helmup:
+  - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2024-08-21T23:13:30.773802+03:00"
+    description: |
+      Official Sirrend HelmUp application
+
+      What is Helmup?
+      Helmup is an innovative tool designed for Ops Engineers, making Helm chart upgrades effortless and efficient.
+
+      As an Ops Engineer, you often need to upgrade Helm chart versions for various reasons:
+
+       - Security Fixes
+       - New Features
+       - Staying Up-to-Date
+       - And More...
+
+      To streamline this process, we created HELMUP!
+
+      Leveraging AI, Helmup scans your GitHub repositories, identifies all your Helm charts, and searches online for the latest updates. Once a new version is found, the AI engine automatically updates your files and values, and then:
+
+       - Creates a Pull Request (PR) in your GitHub repository
+       - Optionally generates a Jira ticket
+       - Optionally sends notifications via Slack or Microsoft Teams
+      
+      Architecture
+
+      Helmup is built on a microservices architecture, consisting of three core components:
+
+       - Engine: Handles the AI and upgrade mechanism
+       - Scraper: Scans your GitHub repository for Helm charts
+       - Notifications: Manages notifications through MS Teams or Slack
+        
+    digest: e3af6fc7789298fda86ffbaa814bb9416250906e2ad48fb9dfd8116cdd97833c
+    maintainers:
+    - email: business@sirrend.com
+      name: Sirrend
+      url: https://www.sirrend.io/
+    name: helmup
+    type: application
+    urls:
+    - helmup-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-08-21T23:13:30.771785+03:00"

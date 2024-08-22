@@ -5,6 +5,34 @@
 
 ![image](docs/imgs/helmup.jpg)
 
+# What is Helmup?
+
+Helmup is an innovative tool designed for Ops Engineers, making Helm chart upgrades effortless and efficient.
+
+As an Ops Engineer, you often need to upgrade Helm chart versions for various reasons:
+
+- Security Fixes
+- New Features
+- Staying Up-to-Date
+- And More...
+
+To streamline this process, we created HELMUP!
+
+Leveraging AI, Helmup scans your GitHub repositories, identifies all your Helm charts, and searches online for the latest updates. Once a new version is found, the AI engine automatically updates your files and values, and then:
+
+- Creates a Pull Request (PR) in your GitHub repository
+- Optionally generates a Jira ticket
+- Optionally sends notifications via Slack or Microsoft Teams
+
+Architecture
+
+Helmup is built on a microservices architecture, consisting of three core components:
+
+- Engine: Handles the AI and upgrade mechanism
+- Scraper: Scans your GitHub repository for Helm charts
+- Notifications: Manages notifications through MS Teams or Slack
+
+
 ## 💫 The Magic We Offer
 | Chart Type  | Upgrade Description |
 | ------------- | ------------- |
@@ -20,38 +48,75 @@
 
 2. **Download the Latest Version:**
     ```bash
-    helm repo add <repo-name> <repo-url>
+    helm repo add sirrend https://sirrend.github.io/helmup/charts/
     helm repo update
-    helm pull <repo-name>/<chart-name>
+    helm pull sirrend/helmup
     ```
 
 3. **Install or Upgrade:**  
     You can now proceed to install or upgrade the Helm chart using the downloaded version.
 
     ```bash
-    helm upgrade --install <release-name> <repo-name>/<chart-name> --version <latest-version>
+    helm upgrade --install <release-name> sirrend/helmup --version 0.1.0
     ```
 </br>
 
-## </> Application Env Vars
+## Requirements 
+The application expects a k8s secret "helmup-secret" with the following keys:
 
-| Variable Name             | Type   | Default Value | Description                                        |
-| --------------------------| -------| ------------- | -------------------------------------------------- |
-| `DESIRED_KUBE_VERSION`    | string | `""`          | The desired Kubernetes version to be used.          |
-| `REFORMAT_HELM_TEMPLATES` | bool   | `false`       | Flag to enable or disable reformatting Helm templates. |
-| `UPGRADE_MAJORS`          | bool   | `false`       | Flag to allow or prevent major upgrades.            |
-| `JIRA_ENABLED`            | bool   | `false`       | Flag to enable or disable JIRA integration.         |
-| `JIRA_SERVER_URL`         | string | `""`          | The URL of the JIRA server.                         |
-| `JIRA_PROJECT_KEY`        | string | `""`          | The project key used in JIRA.                       |
-| `JIRA_USERNAME`           | string | `""`          | The username for JIRA authentication.               |
-| `JIRA_TOKEN`              | string | `""`          | The API token for JIRA.                             |
-| `GITHUB_TOKEN`            | string | `""`          | The GitHub token used for authentication.  |
+```["openai_token", "github_token", "jira_token", ""(Optional) ]```
+
+We provided a convinient way to use `ExternSecrets` application to retreive them. If used externally, make sure to create a secret named `helmup-secret` with these keys!
+
+## </> Mandatory Secrets
+
+| Secret Key                | Required  | Secret Name       | Description                                                   |
+| --------------------------| --------- | ----------------- | --------------------------------------------------------------|
+| `openai_token`            | true      | `helmup-secret`   | Your personal OPENAI token to be used in the engine.          |
+| `github_token`            | true      | `helmup-secret`   | Your persoanl github token to be used to scrape the git repo. |
+| `jira_token`              | false     | `helmup-secret`   | Your Jira token to be used to open Jira tickets (Optional).   |
+| `webhook_url`             | false     | `helmup-secret`   | Your webhook URL for Slack / MS Teams only (Optional).        |
 
 </br>
 
-## ⚙️ Helm Chart Values
+## ⚙️ Helm Chart Global Values
 <details>
-<summary>Expand</summary>
+Global Values for the application. Read carefully before installation!
+<summary>Global</summary>
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| global.appConfig.github.CUSTOMER_NAME | string | `"sirrend"` | Required: Github account / project name |
+| global.appConfig.github.GIT_BRANCH | string | `"main"` | Required: Github branch name to scrape |
+| global.appConfig.github.GIT_REPOSITORY_NAME | string | `"kuba_test"` | Required: Github repo name |
+| global.appConfig.github.GIT_REPOSITORY_URL | string | `"https://github.com/sirrend/kuba_test.git"` | Required: Github repository URL |
+| global.appConfig.jira.enabled | bool | `true` | Required: Whether to enable jira notifications / tickets creation |
+| global.appConfig.jira.project_key | string | `"SI"` | The jira project key |
+| global.appConfig.jira.server_url | string | `"https://sirrend.atlassian.net/"` | The jira server URL |
+| global.appConfig.jira.username | string | `"yuvalpress@gmail.com"` | Jira username |
+| global.appConfig.notifications.enabled | bool | `true` | Required: Whether or not to send notification via channels (slack or teams - as configured in the notifications section) |
+| global.appConfig.notifications.type | string | `"slack"` | Valid options are ["slack", "teams", "None"] |
+| global.appConfig.reformat_helm_templates | bool | `true` | Whether or not to improve the helm manifest using AI capabilities. Recommended! |
+| global.appConfig.target_kube_version | string | `"1.30.0"` |  |
+| global.appConfig.upgrade_majors | string | `"disabled"` | Whether or not to upgrade major chart's versions |
+| global.externalSecret.backendType | string | `"secretsManager"` | Specify the secretStoreRef, e.g., secretsManager for AWS Secrets Manager |
+| global.externalSecret.enabled | bool | `true` | Required: Support for external secrets operator: Enables/Disables externalSecret to be imported to the namespace. Conflicts with "secretNameOverride" |
+| global.externalSecret.refreshInterval | string | `"30h"` | Speficy the refresh interval for the secret |
+| global.externalSecret.secretKeyGithub | string | `"sirrend-github-token"` | The secret name to pull from SecretStore for the Github token |
+| global.externalSecret.secretKeyJira | string | `"sirrend-jira-token"` | The secret name to pull from SecretStore for the Jira token |
+| global.externalSecret.secretKeyNotificationsWebhookUrl | string | `"sirrend-slack-webhook-secret"` | The secret name to pull from SecretStore for the notifications channel (slack/teams) webhhok url |
+| global.externalSecret.secretKeyOpenAI | string | `"chatgpt-token"` | The secret name to pull from SecretStore for the openAI chatgpt token |
+| global.externalSecret.secretStoreRef | object | `{"kind":"ClusterSecretStore","name":"aws-secrets-manager"}` | Specify the secretStoreRef |
+| global.externalSecret.secretTemplate | object | `{"annotations":{},"data":{},"labels":{},"type":"Opaque"}` | externalSecret template |
+| global.externalSecret.secretVersion | string | `""` | Optional |
+| global.secretNameOverride | string | `""` | If using a self-defined secret, specify its name |
+</details>
+</br>
+
+## ⚙️ Helm Chart Services Values
+<details>
+Values for the different Microservices: `engine`, `notifications` and `scraper`
+<summary>Applications</summary>
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -110,30 +175,6 @@
 | engine.tolerations | list | `[]` |  |
 | engine.volumeMounts | list | `[]` | Extra volumes for the engine pod |
 | engine.volumes | list | `[]` | Extra volume mounts for the engine container |
-| global.appConfig.github.CUSTOMER_NAME | string | `"sirrend"` | Required: Github account / project name |
-| global.appConfig.github.GIT_BRANCH | string | `"main"` | Required: Github branch name to scrape |
-| global.appConfig.github.GIT_REPOSITORY_NAME | string | `"kuba_test"` | Required: Github repo name |
-| global.appConfig.github.GIT_REPOSITORY_URL | string | `"https://github.com/sirrend/kuba_test.git"` | Required: Github repository URL |
-| global.appConfig.jira.enabled | bool | `true` | Required: Whether to enable jira notifications / tickets creation |
-| global.appConfig.jira.project_key | string | `"SI"` | The jira project key |
-| global.appConfig.jira.server_url | string | `"https://sirrend.atlassian.net/"` | The jira server URL |
-| global.appConfig.jira.username | string | `"yuvalpress@gmail.com"` | Jira username |
-| global.appConfig.notifications.enabled | bool | `true` | Required: Whether or not to send notification via channels (slack or teams - as configured in the notifications section) |
-| global.appConfig.notifications.type | string | `"slack"` | Valid options are ["slack", "teams", "None"] |
-| global.appConfig.reformat_helm_templates | bool | `true` | Whether or not to improve the helm manifest using AI capabilities. Recommended! |
-| global.appConfig.target_kube_version | string | `"1.30.0"` |  |
-| global.appConfig.upgrade_majors | string | `"disabled"` | Whether or not to upgrade major chart's versions |
-| global.externalSecret.backendType | string | `"secretsManager"` | Specify the secretStoreRef, e.g., secretsManager for AWS Secrets Manager |
-| global.externalSecret.enabled | bool | `true` | Required: Support for external secrets operator: Enables/Disables externalSecret to be imported to the namespace. Conflicts with "secretNameOverride" |
-| global.externalSecret.refreshInterval | string | `"30h"` | Speficy the refresh interval for the secret |
-| global.externalSecret.secretKeyGithub | string | `"sirrend-github-token"` | The secret name to pull from SecretStore for the Github token |
-| global.externalSecret.secretKeyJira | string | `"sirrend-jira-token"` | The secret name to pull from SecretStore for the Jira token |
-| global.externalSecret.secretKeyNotificationsWebhookUrl | string | `"sirrend-slack-webhook-secret"` | The secret name to pull from SecretStore for the notifications channel (slack/teams) webhhok url |
-| global.externalSecret.secretKeyOpenAI | string | `"chatgpt-token"` | The secret name to pull from SecretStore for the openAI chatgpt token |
-| global.externalSecret.secretStoreRef | object | `{"kind":"ClusterSecretStore","name":"aws-secrets-manager"}` | Specify the secretStoreRef |
-| global.externalSecret.secretTemplate | object | `{"annotations":{},"data":{},"labels":{},"type":"Opaque"}` | externalSecret template |
-| global.externalSecret.secretVersion | string | `""` | Optional |
-| global.secretNameOverride | string | `""` | If using a self-defined secret, specify its name |
 | notifications.affinity | object | `{}` |  |
 | notifications.enabled | bool | `true` |  |
 | notifications.fullnameOverride | string | `""` |  |
