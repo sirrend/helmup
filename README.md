@@ -40,7 +40,7 @@ Helmup is built on a microservices architecture, consisting of three core compon
 | `Community-maintained` Charts  | Upgrade to the next available version.  |  
 </br>
 
-## Requirements 
+## 🗒️ Requirements 
 
 ```
 ⚠️ Note: The helmup Application is designed to work on Values.yaml files resides in a Git Repo (Gitops style.)
