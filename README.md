@@ -90,12 +90,12 @@ We provided a convinient way to use `ExternSecrets` application to retreive them
 
 ## Mandatory Secrets
 
-| Secret Key                | Required  | Secret Name       | Description                                                   |
-| --------------------------| --------- | ----------------- | --------------------------------------------------------------|
-| `openai_token`            | true      | `helmup-secret`   | Your personal OPENAI token to be used in the engine.          |
-| `github_token`            | true      | `helmup-secret`   | Your persoanl github token to be used to scrape the git repo. |
-| `jira_token`              | false     | `helmup-secret`   | Your Jira token to be used to open Jira tickets (Optional).   |
-| `webhook_url`             | false     | `helmup-secret`   | Your webhook URL for Slack / MS Teams only (Optional).        |
+| Secret Key                | Required  | Secret Name       | Description                                                   | Comment |
+| --------------------------| --------- | ----------------- | --------------------------------------------------------------| ------- |
+| `openai_token`            | true      | `helmup-secret`   | Your personal OPENAI token to be used in the engine.          |  Supports any version model. Preferrable `ChatGPT 4.0` [How to create this token?](#creating-an-openai-chatgpt-token)       |
+| `github_token`            | true      | `helmup-secret`   | Your persoanl github token to be used to scrape the git repo. |  [How to create this token?](#creating-a-classic-gitHub-token)        |
+| `jira_token`              | false     | `helmup-secret`   | Your Jira token to be used to open Jira tickets (Optional).   |         |
+| `webhook_url`             | false     | `helmup-secret`   | Your webhook URL for Slack / MS Teams only (Optional).        |  [Create Slack Webhook URL](#How-to-create-a-slack-webhook)       |
 
 </br>
 
