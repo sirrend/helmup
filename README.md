@@ -322,7 +322,6 @@ Values for the different Microservices: `engine`, `notifications` and `scraper`
 ## Creating an OpenAI ChatGPT token
 
 <details>
-### How to Create a ChatGPT API Token
 
 To create a token for OpenAI's GPT models, including ChatGPT, you'll need to follow these steps to generate an API key through OpenAI:
 
