@@ -1,5 +1,5 @@
 # HelmUp - Charts Auto-Updater
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/helmup)](https://artifacthub.io/packages/search?repo=helmup) ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/helmup)](https://artifacthub.io/packages/helm/helmup/helmup) ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
 
 **HelmUp** is a Kubernetes-based utility designed to upgrade the configuration of both community-maintained and self-owned Helm charts.  
 
@@ -40,6 +40,33 @@ Helmup is built on a microservices architecture, consisting of three core compon
 | `Community-maintained` Charts  | Upgrade to the next available version.  |  
 </br>
 
+## Requirements 
+
+```
+⚠️ Note: The helmup Application is designed to work on Values.yaml files resides in a Git Repo (Gitops style.)
+We currently not supprting any other installation methods for helm (For example, using --set). Upcomming feature in the CLI.
+```
+
+### Tokens
+
+* OpenAI/ChatGPT token - for use in the engine. [How to create this token?](#creating-an-openai-chatgpt-token)
+
+Note: All models versions are supported. Best performence with `ChatGPT 4.0`
+* GitHub Token - To scrape customer Repo. [How to create this token?](#creating-a-classic-gitHub-token)  
+
+<i>Optionally:</i>
+* [Slack](#How-to-create-a-slack-webhook) / Teams Webhook Token
+* Jira token
+
+### Kubernetes Secrets
+The application expects a k8s secret "helmup-secret" with the following keys:
+
+```["openai_token", "github_token", "jira_token", "webhook_url"(Optional) ]```
+
+We provided a convinient way to use `ExternSecrets` application to retreive them. If used externally, make sure to create a secret named `helmup-secret` with these keys!
+
+### See [Mandatory Secrets](#mandatory-secrets) section for more info! 
+
 ## ▶️ Getting started
 ### Instructions
 
@@ -61,14 +88,7 @@ Helmup is built on a microservices architecture, consisting of three core compon
     ```
 </br>
 
-## Requirements 
-The application expects a k8s secret "helmup-secret" with the following keys:
-
-```["openai_token", "github_token", "jira_token", "webhook_url"(Optional) ]```
-
-We provided a convinient way to use `ExternSecrets` application to retreive them. If used externally, make sure to create a secret named `helmup-secret` with these keys!
-
-## </> Mandatory Secrets
+## Mandatory Secrets
 
 | Secret Key                | Required  | Secret Name       | Description                                                   |
 | --------------------------| --------- | ----------------- | --------------------------------------------------------------|
@@ -247,7 +267,142 @@ Values for the different Microservices: `engine`, `notifications` and `scraper`
 </details>
 </br>
 
-## 🚀 What's Next?
+# Helper Guides
+
+## Creating a Classic GitHub token
+<details>
+
+### 1. Sign In to Your GitHub Account
+
+- Visit [GitHub](https://github.com/) and sign in with your credentials.
+
+### 2. Navigate to Developer Settings
+
+- In the upper-right corner of any page, click on your profile photo, then select **Settings** from the dropdown menu.
+- Scroll down to the bottom of the left sidebar and click on **Developer settings**.
+
+### 3. Go to Personal Access Tokens
+
+- In the left sidebar, click on **Personal access tokens**.
+- Then click on **Tokens (classic)**.
+
+### 4. Generate a New Token
+
+- Click the **Generate new token** button.
+- Add a descriptive **note** to identify what this token will be used for.
+
+### 5. Set the Expiration Date (Optional)
+
+- Select an expiration date for your token if you want it to automatically expire after a certain period. GitHub recommends setting a token expiration to keep your account secure.
+
+### 6. Select "Repo" Permissions
+
+- In the **Select scopes** section, check the box for **repo**. This will give the token full control of private repositories, including the ability to read and write to repositories, as well as access to issues and pull requests.
+
+![image](docs/imgs/github-classic.png)
+
+### 7. Generate the Token
+
+- After selecting the necessary permissions, scroll down and click the **Generate token** button.
+
+- **Copy your new personal access token**. You won’t be able to see it again once you leave this page.
+
+### 8. Store Your Token Securely
+
+- Store your token securely. Treat it like a password—never share it publicly or expose it in your code. If your token is ever compromised, revoke it immediately and generate a new one.
+
+### Important Notes
+
+- **Security**: Always keep your token secure. Do not hard-code it directly into your source files. Use environment variables or secret management tools.
+- **Revoking a Token**: If you no longer need the token or if it is compromised, return to the **Tokens (classic)** section under **Developer settings** and click **Delete** next to the token to revoke it.
+- **Permissions**: Be cautious with the permissions you assign to a token. Only grant the minimum permissions necessary for your use case.
+</details>
+</br>
+
+## Creating an OpenAI ChatGPT token
+
+<details>
+### How to Create a ChatGPT API Token
+
+To create a token for OpenAI's GPT models, including ChatGPT, you'll need to follow these steps to generate an API key through OpenAI:
+
+### 1. Sign Up for an OpenAI Account
+If you don't already have an OpenAI account, you'll need to create one. Visit [OpenAI's website](https://platform.openai.com/signup) and sign up for an account.
+
+### 2. Access the API Dashboard
+Once you've logged in to your OpenAI account, navigate to the [API dashboard](https://platform.openai.com/account/api-keys).
+
+### 3. Generate a New API Key
+In the API dashboard, you will see an option to create a new API key. Click the "Create new secret key" button.
+
+A new API key will be generated. **Make sure to copy and save this key in a secure place**, as it will not be shown again.
+
+### 4. Use Your API Key
+You can use this API key to authenticate requests to OpenAI's API endpoints. In your application or script, use this key to make requests to the OpenAI API, allowing you to access GPT-3.5, GPT-4, or other models.
+
+### Important Notes
+
+- **Security**: Treat your API key like a password. Keep it private and never share it publicly. If your key is compromised, you can regenerate it from the API dashboard.
+- **Rate Limits and Usage**: Be aware of OpenAI's rate limits and usage policies, which depend on your plan. You can monitor your usage on the same dashboard where you created the key.
+- **Billing**: Ensure you understand the billing structure. Depending on your usage and the model you use, costs may vary. OpenAI provides details on pricing on their [pricing page](https://openai.com/pricing).
+</details>
+</br>
+
+## How to Create a Slack Webhook
+<details>
+A Slack webhook allows you to send messages from external applications to your Slack workspace. Follow these steps to create a Slack webhook:
+
+### 1. Sign In to Your Slack Workspace
+
+- Go to [Slack](https://slack.com/) and sign in with your workspace credentials.
+
+### 2. Navigate to Slack API
+
+- Visit the [Slack API: Incoming Webhooks](https://api.slack.com/messaging/webhooks) page.
+
+### 3. Create a New App
+
+- Click the **Create an App** button.
+
+### 4. Configure Your Slack App
+
+- In the pop-up window, select **From scratch**.
+- Enter a **name** for your app (e.g., "My Webhook App").
+- Select the Slack **workspace** where you want to install the app, then click **Create App**.
+
+### 5. Set Up Incoming Webhooks
+
+- Once your app is created, you will be redirected to the app settings page.
+- In the left sidebar, click on **Incoming Webhooks**.
+- Toggle the **Activate Incoming Webhooks** switch to **On**.
+
+### 6. Create a New Webhook URL
+
+- Scroll down to the **Webhook URLs for Your Workspace** section.
+- Click the **Add New Webhook to Workspace** button.
+
+### 7. Select a Channel
+
+- You will be redirected to a page where you can select a channel to post messages to. Choose the appropriate channel from the dropdown list.
+- Click the **Allow** button to grant your app permission to post in the selected channel.
+
+### 8. Copy Your Webhook URL
+
+- After allowing permissions, you will be redirected back to the Incoming Webhooks settings page.
+- You will see a new webhook URL under the **Webhook URLs for Your Workspace** section.
+- **Copy the webhook URL**. This is the URL you'll use to send messages to Slack from your external applications.
+
+### 9. Test Your Webhook
+
+- To test your webhook, you can use a tool like `curl` or Postman to send a POST request.
+- Here's an example using `curl` in the terminal:
+  ```bash
+  curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, Slack!"}' YOUR_WEBHOOK_URL
+
+</details>
+</br>
+
+# 🚀 What's Next?
 1. Upgrade capability for targeting specific community-chart versions.
 2. Enhanced UI for managing and visualizing the current state of charts.
 3. Extended support for additional notification channels and methods.  
@@ -256,7 +411,7 @@ Values for the different Microservices: `engine`, `notifications` and `scraper`
 
 </br>
 
-## ©️ LICENSE - BSL Restricted
+# ©️ LICENSE - BSL Restricted
 ### 👥 Maintainers
 | Name    | Email                | Website                  |
 |---------|----------------------|--------------------------|
