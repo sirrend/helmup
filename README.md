@@ -61,7 +61,7 @@ Note: All models versions are supported. Best performence with `ChatGPT 4.0`
 ### Kubernetes Secrets
 The application expects a k8s secret "helmup-secret" with the following keys:
 
-```["openai_token", "github_token", "jira_token", "webhook_url"(Optional) ]```
+```["openai_token", "github_token", "jira_token"(Optional), "webhook_url"(Optional) ]```
 
 We provided a convinient way to use `ExternSecrets` application to retreive them. If used externally, make sure to create a secret named `helmup-secret` with these keys!
 
@@ -89,6 +89,14 @@ We provided a convinient way to use `ExternSecrets` application to retreive them
 </br>
 
 ## Mandatory Secrets
+
+### Note: K8S Secret Vs. ExternalSecret
+
+Helmup applications supports both using a pre-defined k8s secret, OR using the external-secrets operator.
+
+Note: If using a pre-defined k8s secret, please make sure to set the following values:
+* global.secretNameOverride="<Your_predefined_secret_name>"
+* global.externalSecret.enabled="false"
 
 | Secret Key                | Required  | Secret Name       | Description                                                   | Comment |
 | --------------------------| --------- | ----------------- | --------------------------------------------------------------| ------- |
@@ -288,7 +296,8 @@ Values for the different Microservices: `engine`, `notifications` and `scraper`
 
 ### 4. Generate a New Token
 
-- Click the **Generate new token** button.
+- Click the **Generate new token (Classic)** button.
+![image](docs/imgs/github-generate.png)
 - Add a descriptive **note** to identify what this token will be used for.
 
 ### 5. Set the Expiration Date (Optional)

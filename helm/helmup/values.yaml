@@ -1,6 +1,6 @@
 # NOTE: The application expects a k8s secret "helmup-secret" with the following keys:
-# ["openai_token", "github_token", "jira_token", "webhook_url"(Optional) ]
-# We provided a convinient way to use ExternSecrets application to retreive them. If used externally, make sure to create a secret named "helmup-secret" with these keys: ["openai_token", "github_token", "jira_token", "webhook_url"(Optional) ]
+# ["openai_token", "github_token", "jira_token"(Optional), "webhook_url"(Optional) ]
+# We provided a convinient way to use ExternSecrets application to retreive them. If used externally, make sure to create a secret named "helmup-secret" with these keys: ["openai_token", "github_token", "jira_token"(Optional), "webhook_url"(Optional) ]
 global:
   # -- If using a self-defined secret, specify its name
   secretNameOverride: ""
