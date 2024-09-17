@@ -56,6 +56,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "helmup-service.secret" . }}
                   key: jira_token
+                  optional: true
             - name: "DESIRED_KUBE_VERSION"
               value: "{{ .Values.global.appConfig.target_kube_version }}"
             - name: "REFORMAT_HELM_TEMPLATES"
